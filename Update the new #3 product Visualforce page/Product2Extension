@@ -13,9 +13,9 @@ public class Product2Extension {
             productsToInsert.add( new ProductWrapper() );
         }
     }
-    	Public list<SelectOption> GetFamilyOptions(){
+    	Public list<SelectOption> GetFamilyOptions(){                         //Just adding get to the methodname, vfp can identify them "kind of black magic" No need of mentioning {get;set;}
         List<SelectOption> options=new List<SelectOption>();
-        options.add(new SelectOption(Constants.SELECT_ONE,Constants.SELECT_ONE));
+        options.add(new SelectOption(Constants.SELECT_ONE,Constants.SELECT_ONE));   //in the params we are giving label and the value in which this case both are same
             for(PicklistEntry pe:Constants.PRODUCT_FAMILY){
                 options.add(new SelectOption(pe.getValue(),pe.getLabel()));
             }
@@ -28,13 +28,13 @@ public class Product2Extension {
     }
 
     public PageReference Save(){
-              Savepoint sp=Database.setSavepoint();//it helps you rollback transaction if needed
+              Savepoint sp=Database.setSavepoint();                            //it helps you rollback transaction if needed
         try {
        
             List<Product2> newProduts=new list<Product2>();
             List<ProductWrapper> filteredProducts=new list<ProductWrapper>();
             
-            for(ProductWrapper p:productsToInsert){
+            for(ProductWrapper p:productsToInsert){				//it has list of newly inserted records on which we are performing the filtering
                 if(!String.isBlank(p.productRecord.Name) && !String.isBlank(p.productRecord.Family) &&
                   p.productRecord.Family!=Constants.SELECT_ONE && p.productRecord.isActive && 
                   p.productRecord.Initial_Inventory__c!=null && p.productRecord.Initial_Inventory__c!=0 &&
@@ -43,17 +43,17 @@ public class Product2Extension {
                        filteredProducts.add(p);
                    }
             }
-            for(ProductWrapper pd:filteredProducts){
+            for(ProductWrapper pd:filteredProducts){    //as it is a type of wrapper class we created new list of type products and added those records
                 newProduts.add(pd.productRecord);
             }
            
-            Database.SaveResult[] productSaveResults=Database.insert(newProduts,false);
-            List<PriceBookEntry> pbelist=new list<PriceBookEntry>();
+            Database.SaveResult[] productSaveResults=Database.insert(newProduts,false);  // we performed insert operation on prodcuts and made false which revoke the operation if anyrecord fails getting inserted
+            List<PriceBookEntry> pbelist=new list<PriceBookEntry>();  //once the products are inserted we will have the productid through which we can create a pricebookentry 
             
             
             for(Integer i=0;i<productSaveResults.size();i++){
-                if(productSaveResults[i].isSuccess()){
-                    PriceBookEntry pbe=filteredProducts[i].pricebookEntryRecord; // Refers to an existing record the user is editing on the page
+                if(productSaveResults[i].isSuccess()){			
+                    PriceBookEntry pbe=filteredProducts[i].pricebookEntryRecord; //We are not creating new PBE record instead Refering to an existing record the user is editing on the page so, tat you will have entered values ready
                     pbe.Product2Id=productSaveResults[i].getId();
                     pbe.IsActive=true;
                     pbe.Pricebook2Id=Constants.STANDARD_PRICEBOOK_ID;
@@ -75,7 +75,7 @@ public class Product2Extension {
         }
         return null;
     }
-    public class ProductWrapper{
+    public class ProductWrapper{									//as we have to somehow connect this both objects, we are using wrapper class to make it possible and replaced the Product2 type with newlycreated class name
         public Product2 productRecord {set;get;}
         public PriceBookEntry pricebookEntryRecord {set;get;}
         
