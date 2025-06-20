@@ -13,7 +13,7 @@
             </apex:pageBlock>
             <apex:pageBlock title="New Products" >
                 <apex:pageBlockButtons location="top">
-                    <apex:commandButton action="{!save}" value="Save" reRender="orderItemTable,pageMessages" />
+                    <apex:commandButton action="{!save}" value="Save" reRender="orderItemTable,pageMessages" />    //instead of rendering entire page we are selecting which pats need to nbe rerenderd
                 </apex:pageBlockButtons>
                 <apex:pageBlockButtons location="bottom">
                     <apex:commandButton action="{!addRows}" value="Add" reRender="orderItemTable,pageMessages" />
