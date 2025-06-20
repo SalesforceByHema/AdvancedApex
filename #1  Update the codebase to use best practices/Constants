@@ -1,0 +1,14 @@
+public class Constants {
+
+    Public static final Integer DEFAULT_ROWS=5;
+   Public static final String SELECT_ONE=Label.Select_One;
+   Public static final String INVENTORY_LEVEL_LOW=Label.Inventory_Level_Low;
+    Public static final List<Schema.PicklistEntry> PRODUCT_FAMILY =Product2.Family.getDescribe().getPicklistValues();
+   Public static final String DRAFT_ORDER_STATUS='Draft';
+    Public static final String ACTIVATED_ORDER_STATUS='Activated';
+    Public static final String INVENTORY_ANNOUNCEMENTS='Inventory Announcements';
+   Public static final String ERROR_MESSAGE='An error has occurred, please take a screenshot with the URL and send it to IT.';
+    Public static final PriceBookId__c p=PriceBookId__c.getInstance();
+    Public static final String STANDARD_PRICEBOOK_ID=p.StandardPriceBookID__c; //created a custom setting and strored the id over there
+    
+}
