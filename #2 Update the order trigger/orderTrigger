@@ -1,0 +1,10 @@
+/**
+ * @name orderTrigger
+ * @description
+**/
+trigger orderTrigger on Order (after update) {
+    if(Trigger.isUpdate && Trigger.new!=null){
+        System.debug('im in triger');
+        OrderHelper.AfterUpdate(Trigger.new,Trigger.old);
+    }
+}
