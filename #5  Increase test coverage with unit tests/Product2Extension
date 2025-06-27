@@ -1,0 +1,90 @@
+public class Product2Extension {
+
+    public List<ProductWrapper> productsToInsert {get;set;}
+
+    public Product2Extension(ApexPages.StandardController controller){
+        productsToInsert = new List<ProductWrapper>();
+        addRows();
+    }
+    
+
+    public void AddRows(){
+        for ( Integer i=0; i<Constants.DEFAULT_ROWS; i++ ){
+            productsToInsert.add( new ProductWrapper() );
+        }
+    }
+    	Public list<SelectOption> GetFamilyOptions(){
+        List<SelectOption> options=new List<SelectOption>();
+        options.add(new SelectOption(Constants.SELECT_ONE,Constants.SELECT_ONE));
+            for(PicklistEntry pe:Constants.PRODUCT_FAMILY){
+                options.add(new SelectOption(pe.getValue(),pe.getLabel()));
+            }
+            return options;
+    }
+    
+    
+    public List<ChartHelper.ChartData> GetInventory(){
+        return ChartHelper.GetInventory();
+    }
+
+    public PageReference Save(){
+              Savepoint sp=Database.setSavepoint();//it helps you rollback transaction if needed
+        try {
+       
+            List<Product2> newProduts=new list<Product2>();
+            List<ProductWrapper> filteredProducts=new list<ProductWrapper>();
+            
+            for(ProductWrapper p:productsToInsert){
+                if(!String.isBlank(p.productRecord.Name) && !String.isBlank(p.productRecord.Family) &&
+                  p.productRecord.Family!=Constants.SELECT_ONE && p.productRecord.isActive && 
+                  p.productRecord.Initial_Inventory__c!=null && p.productRecord.Initial_Inventory__c!=0 &&
+                  p.pricebookEntryRecord.UnitPrice!=null &&
+                   p.pricebookEntryRecord.UnitPrice!=0){
+                       filteredProducts.add(p);
+                   }
+            }
+            for(ProductWrapper pd:filteredProducts){
+                newProduts.add(pd.productRecord);
+            }
+           
+            Database.SaveResult[] productSaveResults=Database.insert(newProduts,false);
+            List<PriceBookEntry> pbelist=new list<PriceBookEntry>();
+            
+            
+            for(Integer i=0;i<productSaveResults.size();i++){
+                if(productSaveResults[i].isSuccess()){
+                    PriceBookEntry pbe=filteredProducts[i].pricebookEntryRecord; // Refers to an existing record the user is editing on the page
+                    pbe.Product2Id=productSaveResults[i].getId();
+                    pbe.IsActive=true;
+                    pbe.Pricebook2Id=Constants.STANDARD_PRICEBOOK_ID;
+                    pbelist.add(pbe);
+                    
+                }
+            }
+            Database.SaveResult[] pbeSaveResults=Database.insert(pbelist,false);
+
+            //If successful clear the list and display an informational message
+            apexPages.addMessage(new ApexPages.message(ApexPages.Severity.INFO,productsToInsert.size()+' Inserted'));
+            productsToInsert.clear();   //Do not remove
+            addRows();  //Do not remove
+        } catch (Exception e){
+				System.debug('Exception Occured'+e.getMessage());
+            	Database.rollback(sp);
+            	apexPages.addMessage(new apexPages.message(ApexPages.Severity.ERROR,Constants.ERROR_MESSAGE));
+                
+        }
+        return null;
+    }
+    public class ProductWrapper{
+        public Product2 productRecord {set;get;}
+        public PriceBookEntry pricebookEntryRecord {set;get;}
+        
+        public ProductWrapper(){
+            productRecord=new Product2(Initial_Inventory__c=0);
+          pricebookEntryRecord=new PriceBookEntry(UnitPrice=0.0);
+            
+        }
+        
+    }
+
+}
