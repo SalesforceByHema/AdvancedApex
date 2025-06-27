@@ -1,0 +1,22 @@
+@isTest
+Public class OrderTests {
+
+    @testSetup
+    public static void setupTestData(){
+             TestDataFactory.InsertTestData(5);  
+    }
+    static testmethod void OrderUpdate_unitTest(){
+        test.startTest();
+        Order rec=[select id,status from Order limit 1];
+        Product2 prod=[select Family,id,Name,Quantity_Ordered__C,Quantity_Remaining__c from Product2 limit1];
+        
+        rec.status=Constants.ACTIVATED_ORDER_STATUS;
+        update rec;
+        
+        Product2 UpdatedProd=[select Family,id,Name,Quantity_Ordered__C,Quantity_Remaining__c from Product2 limit1];
+        TestDataFactory.VerifyQuantityOrdered(prod,updatedprod,constants.DEFAULT_ROWS);
+
+         Test.stopTest();
+    }
+
+}
